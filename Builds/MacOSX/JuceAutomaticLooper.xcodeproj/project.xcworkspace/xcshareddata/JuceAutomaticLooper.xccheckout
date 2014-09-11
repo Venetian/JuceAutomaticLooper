@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>4E063541-0E59-41C1-BC9D-8CBCA1F04670</string>
+	<key>IDESourceControlProjectName</key>
+	<string>JuceAutomaticLooper</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>9688DAA2-0217-4FFD-BCB2-32315AAD975F</key>
+		<string>https://github.com/julianstorer/JUCE.git</string>
+		<key>E29A0A5C-1DD8-44F2-B0AB-806CDC4204C3</key>
+		<string>https://github.com/Venetian/JuceAutomaticLooper.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Builds/MacOSX/JuceAutomaticLooper.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>9688DAA2-0217-4FFD-BCB2-32315AAD975F</key>
+		<string>../../../../../juce</string>
+		<key>E29A0A5C-1DD8-44F2-B0AB-806CDC4204C3</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/Venetian/JuceAutomaticLooper.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>E29A0A5C-1DD8-44F2-B0AB-806CDC4204C3</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>9688DAA2-0217-4FFD-BCB2-32315AAD975F</string>
+			<key>IDESourceControlWCCName</key>
+			<string>juce</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E29A0A5C-1DD8-44F2-B0AB-806CDC4204C3</string>
+			<key>IDESourceControlWCCName</key>
+			<string>JuceAutomaticLooper</string>
+		</dict>
+	</array>
+</dict>
+</plist>
