@@ -87,6 +87,8 @@ JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMess
     
     midiViewer.setSequence(beatDefinedSequence);
 
+    patternSequencer.stepSequenceViewer.setSequence(beatDefinedSequence);
+    
     recordedNoteOffHappened = false;//not really needed in setup
    
     
@@ -101,6 +103,8 @@ JuceSequenceLoopPlayer::~JuceSequenceLoopPlayer(){
 
 void JuceSequenceLoopPlayer::resized(){
     midiViewer.resized();
+    
+    patternSequencer.stepSequenceViewer.resized();
 }
 
 void JuceSequenceLoopPlayer::setSequence(const MidiMessageSequence& targetSequence, int tmpppq){
@@ -138,6 +142,9 @@ void JuceSequenceLoopPlayer::setLoopPointsBeats(float startLoop, float endLoop){
         
         midiViewer.loopMax = &loopEndBeats;
         midiViewer.loopMin = &loopStartBeats;
+        
+        patternSequencer.stepSequenceViewer.loopMax = &loopEndBeats;
+        patternSequencer.stepSequenceViewer.loopMin = &loopStartBeats;
         
         patternSequencer.setLoopPoints(loopStartBeats, loopEndBeats);
     }
@@ -376,7 +383,8 @@ void JuceSequenceLoopPlayer::checkNoteOffs(){
             if (msgPointer->message.isNoteOnOrOff()){
                 std::cout << name << " sending note off " << msgPointer->message.getNoteNumber() << " at " << msgPointer->message.getTimeStamp() << std::endl;
             }
-            scheduledEvents.deleteEvent(index, false);
+            if (scheduledEvents.getEventPointer(index) != nullptr)
+                scheduledEvents.deleteEvent(index, false);
         }
     }
 }
@@ -585,6 +593,9 @@ void JuceSequenceLoopPlayer::newStepSequencerMessageIn(const MidiMessage& messag
             std::cout << name << "reload pattern" << std::endl;
             
             patternSequencer.generateOutputSequence(beatDefinedSequence, patternSequencer.altPitchSet);
+            int tmp = (int)patternSequencer.stepSequenceViewer.changedValue.getValue()+1;
+            patternSequencer.stepSequenceViewer.changedValue.setValue(tmp);
+            
         }
     }
 }

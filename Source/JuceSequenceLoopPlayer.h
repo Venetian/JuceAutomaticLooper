@@ -90,6 +90,7 @@ private:
 
 
 class JuceSequenceLoopPlayer: private AsyncUpdater {
+//friend class JuceMidiFilePlayer;
     //asyncupdater is triggered when new midi message added to our list box above (grabbed from juce demo)
     //so we see the midi messages input
 public:
@@ -176,12 +177,16 @@ public:
     int noteOutVelocity;
     
     MidiSequenceViewer midiViewer;//box to see midi notes
+    Value* viewerValue;
     
     void resized();
-    Value* viewerValue;
+    
     
     void setMode(int mode);
     
+//protected:
+    JucePatternSequencer patternSequencer;
+
 private:
     Array<MidiMessage> midiMessageList;
     
@@ -257,7 +262,7 @@ private:
     
     
     //new pattern stuff
-    JucePatternSequencer patternSequencer;
+
     int looperMode;
     bool recordingOn(){
         return (looperMode == LOOPING_RECORDING);

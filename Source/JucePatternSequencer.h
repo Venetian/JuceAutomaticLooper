@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "MidiSequenceViewer.h"
 
 #include <deque>
 
@@ -33,6 +34,8 @@ public:
 };
 
 class JucePatternSequencer{
+//friend class JuceSequenceLoopPlayer;
+    
 public:
     JucePatternSequencer();
     ~JucePatternSequencer();
@@ -77,6 +80,9 @@ public:
     MidiMessageArraySorter sorter;//for sorting these arrays
     int patternNotesPlayedOn;
     bool reload;
+    
+    MidiSequenceViewer stepSequenceViewer;
+
 //    MidiMessageArraySorter sorter;
     
 };

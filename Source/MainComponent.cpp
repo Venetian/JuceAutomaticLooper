@@ -56,7 +56,8 @@ prophetButton("prophet reverse")// deviceManager()
     midiViewValue.addListener(this);
     
 
-    
+    looperStepSeqValue.referTo(midiPlayer.looper.patternSequencer.stepSequenceViewer.changedValue);
+    looperStepSeqValue.addListener(this);
     
     //prophetNoteValue.setValue(-1);
     prophetNoteValue.addListener(this);
@@ -228,6 +229,9 @@ void MainContentComponent::valueChanged(Value& value){
         std::cout << "sys time changed"<< value.toString() << std::endl;
     } else if (value == midiViewValue){
         repaint();
+    } else if (value == looperStepSeqValue){
+        //midiPlayer.looper.patternSequencer.stepSequenceViewer.
+        repaint();
     } else
         std::cout << "other value changed " << std::endl;
 
@@ -394,6 +398,8 @@ void MainContentComponent::paint (Graphics& g)
     
     midiPlayer.prophet.midiViewer.draw(g);
     midiPlayer.looper.midiViewer.draw(g);
+    
+    midiPlayer.looper.patternSequencer.stepSequenceViewer.draw(g);
 }
 
 void MainContentComponent::resized()

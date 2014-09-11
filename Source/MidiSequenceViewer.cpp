@@ -19,6 +19,7 @@ MidiSequenceViewer::MidiSequenceViewer() : relativeViewerBox(0.1,0.3,0.4,0.2){
     pitchMin = 40;
     pitchMin = 52;
     
+    changedValue = 0;
 }
 
 MidiSequenceViewer::~MidiSequenceViewer(){

@@ -55,6 +55,8 @@ public:
     
     Value moogModeValue;
     
+    Value looperStepSeqValue;
+    
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) ;
  //   void handleIncomingMidiMessageMoog (MidiInput* source, const MidiMessage& message) ;
     

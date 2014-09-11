@@ -41,7 +41,7 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     int soloKey = 0;
     
     
-    int fileToLoad = 7;
+    int fileToLoad = 4;
     
     switch (fileToLoad){
         case 0:
@@ -57,8 +57,8 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
             location = "../../../../exampleMidiFiles/tauras_Bassline.mid";
             break;
         case 4:
-            location = "../../../../exampleMidiFiles/KingKongBassline.mid";
-            moogLocation = "../../../../exampleMidiFiles/KingKongBassline.mid";
+            location = "/Users/andrewrobertson/GitHub/JuceMidiLoopPlayer/exampleMidiFiles/KingKongBassline.mid";
+            //moogLocation = "../../../../exampleMidiFiles/KingKongBassline.mid";
             break;
         case 5:
             location = "../../../../exampleMidiFiles/TaurusBasslineHalftime.mid";
@@ -132,10 +132,14 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     
     prophet.midiViewer.setBounds(60, 350, 320, 100);
     looper.midiViewer.setBounds(400, 350, 320, 100);
-
+looper.patternSequencer.stepSequenceViewer.setBounds(400, 470, 320, 100);
     //to view??
     looper.viewerValue = &midiViewerValue;
     prophet.viewerValue = &midiViewerValue;
+    
+    
+    
+    
     
     
     

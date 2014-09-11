@@ -43,5 +43,8 @@ public:
     int getMinPitch();
     int getMaxPitch();
     
+    //change this to uodate the viewer
+    Value changedValue;
+    
 };
 #endif /* defined(__JuceAbletonMidiFilePlayer__MidiSequenceViewer__) */

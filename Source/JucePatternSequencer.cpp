@@ -8,6 +8,8 @@
 
 #include "JucePatternSequencer.h"
 
+
+
 JucePatternSequencer::JucePatternSequencer(){
 
     loopMax = nullptr;
@@ -38,7 +40,7 @@ JucePatternSequencer::JucePatternSequencer(){
     newMidiMessage(m);
     
     patternNotesPlayedOn = 0;
-    
+
 }
 
 
@@ -56,6 +58,9 @@ void JucePatternSequencer::loadSequence(MidiMessageSequence& sequence){
     sequence.updateMatchedPairs();
     
     pitchSet.clear();
+    
+    //generate pitch set first?
+    
     rhythmPattern.clear();
     if (loopMax != nullptr && loopMin != nullptr){
         for (int i = 0; i < sequence.getNumEvents(); i++){
@@ -70,8 +75,11 @@ void JucePatternSequencer::loadSequence(MidiMessageSequence& sequence){
     }
     
     rhythmPattern.updateMatchedPairs();
-    pitchSet.sort(sorter);
+//    pitchSet.sort(sorter);
     printPitchSet();
+    
+    std::cout << "REORDER" << std::endl;
+    reorderPitchSetAndRhythm();
     
 }
 
@@ -95,7 +103,7 @@ void JucePatternSequencer::newMidiMessage(MidiMessage& message){
             MidiMessage m(144, index, message.getVelocity());
             m.setTimeStamp(message.getTimeStamp());
             rhythmPattern.addEvent(m);
-            std::cout << "new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
+            std::cout << "PatternSeq: new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
         } else {
             //not in pitch set
             //std::cout << "pitch " << pitch << " not present in set " << std::endl;
@@ -212,6 +220,8 @@ void JucePatternSequencer::generateAlternativePitches(Array<MidiMessage>& newNot
 //            altPitchSet[i].setVelocity(newNotes[i].getVelocity());
         }
     }
+    
+    altPitchSet.sort(sorter);//in case out of order
     
     for (int i = 0; i < altPitchSet.size(); i++){
         std::cout << "new pitch set [" << i << "] : " << altPitchSet[i].getNoteNumber() << std::endl;
