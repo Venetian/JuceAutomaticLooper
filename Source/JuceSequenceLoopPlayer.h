@@ -143,6 +143,7 @@ public:
     
     MidiMessageSequence transformedSequence;//make private
     
+    //this is the sequence that gets played out
     MidiMessageSequence beatDefinedSequence;
     
     Value noteOnValue;

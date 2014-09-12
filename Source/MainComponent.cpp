@@ -51,9 +51,10 @@ prophetButton("prophet reverse")// deviceManager()
     finder.beatVal = -1;//to set it to the STOP position
     
     
+    midiPlayer.midiViewerValue.addListener(this);
     
-    midiViewValue.referTo(midiPlayer.midiViewerValue);
-    midiViewValue.addListener(this);
+//    midiViewValue.referTo(midiPlayer.midiViewerValue);
+//    midiViewValue.addListener(this);
     
 
     looperStepSeqValue.referTo(midiPlayer.looper.patternSequencer.stepSequenceViewer.changedValue);
@@ -196,10 +197,10 @@ MainContentComponent::~MainContentComponent()
 
 void MainContentComponent::valueChanged(Value& value){
 
-   std::cout << "value changed " << (float)value.getValue() << std::endl;//(int) << std::endl;
+   //std::cout << "value changed " << (float)value.getValue() << std::endl;//(int) << std::endl;
 
     if (value == beatValue){
-        std::cout << "MCC: valchange: beat " << (float)value.getValue() << " tempo " << (float)tempoValue.getValue() << std::endl;
+        //std::cout << "MCC: valchange: beat " << (float)value.getValue() << " tempo " << (float)tempoValue.getValue() << std::endl;
         
         beatInfo.setText("beat "+value.toString(), dontSendNotification);//(int)value.getValue());
         
@@ -209,7 +210,7 @@ void MainContentComponent::valueChanged(Value& value){
         
     } else if (value == tempoValue){
         tempoInfo.setText("tempo "+value.toString(), dontSendNotification);
-        std::cout << " tempo changed " << value.toString() << std::endl;
+        //std::cout << " tempo changed " << value.toString() << std::endl;
     } else if (value == prophetNoteValue){
         String tmp = value.toString();
         tmp += " ";
@@ -217,7 +218,7 @@ void MainContentComponent::valueChanged(Value& value){
         tmp += String(midiPlayer.prophet.noteOutVelocity);
         prophetLabel.setText(tmp, dontSendNotification);
     } else if (value == prophetReversedValue){
-         std::cout << "prophet reversed val changed"<< std::endl;
+         //std::cout << "prophet reversed val changed"<< std::endl;
         if ((int)prophetReversedValue.getValue() == 1)
             prophetButton.setButtonText("reversed");
         else if ((int)prophetReversedValue.getValue() == 3)
@@ -226,8 +227,8 @@ void MainContentComponent::valueChanged(Value& value){
             prophetButton.setButtonText("inverted");
     } else if (value == sysTimeValue){
         systemTimeInfo.setText("sysTime "+value.toString(), dontSendNotification);
-        std::cout << "sys time changed"<< value.toString() << std::endl;
-    } else if (value == midiViewValue){
+        //std::cout << "sys time changed"<< value.toString() << std::endl;
+    } else if (value == midiPlayer.midiViewerValue){//midiViewValue){
         repaint();
     } else if (value == looperStepSeqValue){
         //midiPlayer.looper.patternSequencer.stepSequenceViewer.
@@ -321,7 +322,7 @@ void MainContentComponent::comboBoxChanged(ComboBox* box)//override
 
 #pragma mark MidiInputReceived
 void MainContentComponent::handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) {
-    std::cout << "midi in '" << source->getName() << "' " << message.getRawDataSize() << " bytes" << std::endl;
+    //std::cout << "midi in '" << source->getName() << "' " << message.getRawDataSize() << " bytes" << std::endl;
     
     //std::cout << source.getDevice
     float tmpTimeNow = midiPlayer.beatsNow();

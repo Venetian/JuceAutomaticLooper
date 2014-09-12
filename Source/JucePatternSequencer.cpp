@@ -9,6 +9,8 @@
 #include "JucePatternSequencer.h"
 
 
+const bool printingOn = false;
+
 
 JucePatternSequencer::JucePatternSequencer(){
 
@@ -78,7 +80,8 @@ void JucePatternSequencer::loadSequence(MidiMessageSequence& sequence){
 //    pitchSet.sort(sorter);
     printPitchSet();
     
-    std::cout << "REORDER" << std::endl;
+    if (printingOn)
+        std::cout << "REORDER" << std::endl;
     reorderPitchSetAndRhythm();
     
 }
@@ -86,7 +89,8 @@ void JucePatternSequencer::loadSequence(MidiMessageSequence& sequence){
 void JucePatternSequencer::setLoopPoints(float& loopPointMin, float& loopPointMax){
     loopMax = &loopPointMax;
     loopMin = &loopPointMin;
-    std::cout << "Pattern sequencer between " << *loopMin << " and " << *loopMax << std::endl;
+    if (printingOn)
+        std::cout << "Pattern sequencer between " << *loopMin << " and " << *loopMax << std::endl;
 }
 
 
@@ -103,7 +107,8 @@ void JucePatternSequencer::newMidiMessage(MidiMessage& message){
             MidiMessage m(144, index, message.getVelocity());
             m.setTimeStamp(message.getTimeStamp());
             rhythmPattern.addEvent(m);
-            std::cout << "PatternSeq: new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
+            if (printingOn)
+                std::cout << "PatternSeq: new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
         } else {
             //not in pitch set
             //std::cout << "pitch " << pitch << " not present in set " << std::endl;
@@ -112,7 +117,9 @@ void JucePatternSequencer::newMidiMessage(MidiMessage& message){
             MidiMessage m(144, index, message.getVelocity());
             m.setTimeStamp(message.getTimeStamp());
             rhythmPattern.addEvent(m);
-            std::cout << "new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
+            
+            if (printingOn)
+                std::cout << "new message ON " << pitch << ", index " << m.getNoteNumber() << ", time " << m.getTimeStamp() << std::endl;
         }
         
         outputSequence.addEvent(message);
@@ -125,7 +132,8 @@ void JucePatternSequencer::newMidiMessage(MidiMessage& message){
             MidiMessage m(128, index, message.getVelocity());
             m.setTimeStamp(message.getTimeStamp());
             rhythmPattern.addEvent(m);
-            std::cout << "new off message " << pitch << ", index " << m.getNoteNumber() << " " << m.getTimeStamp() << std::endl;
+            if (printingOn)
+                std::cout << "new off message " << pitch << ", index " << m.getNoteNumber() << " " << m.getTimeStamp() << std::endl;
         }
         
         outputSequence.addEvent(message);
@@ -149,7 +157,8 @@ bool JucePatternSequencer::playedMidiMessage(const MidiMessage& message){
             m.setTimeStamp(0);//no roblem with this
             patternNotesPlayed.add(m);
             //patternNotesPlayed.sort(sorter);
-            std::cout << "PATTERN NOTES, played" << std::endl;
+            if (printingOn)
+                std::cout << "PATTERN NOTES, played" << std::endl;
             printMidiMessageArray(patternNotesPlayed);
             patternNotesPlayedOn++;
             reload = true;
@@ -159,9 +168,10 @@ bool JucePatternSequencer::playedMidiMessage(const MidiMessage& message){
             
         } else if (message.isNoteOff()){
             patternNotesPlayedOn--;
-            std::cout << "PATTERN NOTES" << std::endl;
+            if (printingOn)
+                std::cout << "PATTERN NOTES" << std::endl;
             printMidiMessageArray(patternNotesPlayed);
-            if (patternNotesPlayedOn == 0)
+            if (patternNotesPlayedOn == 0 && printingOn)
                 std::cout << "FINISHED " << std::endl;
         }
     }
@@ -186,7 +196,8 @@ int JucePatternSequencer::getIndex(int& pitch){
 }
 
 void JucePatternSequencer::printPitchSet(){
-    std::cout << "Pattern Sequencer: PITCH SET" << std::endl;
+    if (printingOn)
+        std::cout << "Pattern Sequencer: PITCH SET" << std::endl;
     printMidiMessageArray(pitchSet);
 //    for (int i = 0; i < pitchSet.size(); i++){
 //        std::cout << "pitch [" << i << "]: " << pitchSet[i].getNoteNumber() << std::endl;
@@ -196,7 +207,7 @@ void JucePatternSequencer::printPitchSet(){
 
 
 void JucePatternSequencer::printMidiMessageArray(Array<MidiMessage>& pitchArray){
-    for (int i = 0; i < pitchArray.size(); i++){
+    for (int i = 0; printingOn && i < pitchArray.size(); i++){
         std::cout << "pitch [" << i << "]: " << pitchArray[i].getNoteNumber() << std::endl;
     }
     
@@ -208,11 +219,13 @@ void JucePatternSequencer::generateAlternativePitches(Array<MidiMessage>& newNot
     altPitchSet = pitchSet;//the original notes
     altPitchSet.sort(sorter);
     newNotes.sort(sorter);
-    std::cout << " EXISTING PITCHES " << std::endl;
+    if (printingOn)
+        std::cout << " EXISTING PITCHES " << std::endl;
     printMidiMessageArray(altPitchSet);
     for (int i = 0; i < newNotes.size(); i++){
         if (altPitchSet.size() > i){
-            std::cout << "REPLACE " << altPitchSet[i].getNoteNumber() << " with " << newNotes[i].getNoteNumber() << std::endl;
+            if (printingOn)
+                std::cout << "REPLACE " << altPitchSet[i].getNoteNumber() << " with " << newNotes[i].getNoteNumber() << std::endl;
             //MidiMessage m = newNotes[i];
             //altPitchSet[i] = m;
             altPitchSet.set(i, newNotes[i]);//NoteNumber(newNotes[i].getNoteNumber());
@@ -223,7 +236,7 @@ void JucePatternSequencer::generateAlternativePitches(Array<MidiMessage>& newNot
     
     altPitchSet.sort(sorter);//in case out of order
     
-    for (int i = 0; i < altPitchSet.size(); i++){
+    for (int i = 0; printingOn && i < altPitchSet.size(); i++){
         std::cout << "new pitch set [" << i << "] : " << altPitchSet[i].getNoteNumber() << std::endl;
     }
 }
@@ -280,12 +293,14 @@ void JucePatternSequencer::generateOutputSequence(MidiMessageSequence& sequence)
 void JucePatternSequencer::reorderPitchSetAndRhythm(){
     Array<MidiMessage> pitchSetCopy = pitchSet;
 
-    std::cout << "reorder" << std::endl;
+    if (printingOn)
+        std::cout << "reorder" << std::endl;
     printPitchSet();
     //MidiMessageArraySorter sorter; put in main class
     pitchSet.sort(sorter);
     
-    std::cout << "after sorting " << std::endl;
+    if (printingOn)
+        std::cout << "after sorting " << std::endl;
     printPitchSet();
     
     Array<int> pitchMap;
@@ -293,7 +308,8 @@ void JucePatternSequencer::reorderPitchSetAndRhythm(){
         int note = pitchSetCopy[k].getNoteNumber();
         pitchSetCopy[k].setNoteNumber(getIndex(note));
         pitchMap.add(getIndex(note));
-        std::cout << "pitch " << k << " is " << getIndex(note) << std::endl;
+        if (printingOn)
+            std::cout << "pitch " << k << " is " << getIndex(note) << std::endl;
     }
     
     

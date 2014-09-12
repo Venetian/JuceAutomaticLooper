@@ -16,10 +16,15 @@ MidiSequenceViewer::MidiSequenceViewer() : relativeViewerBox(0.1,0.3,0.4,0.2){
     loopMax = nullptr;
     loopMin = nullptr;
     
-    pitchMin = 40;
-    pitchMin = 52;
+//    pitchMin = 38;
+  //  pitchMin = 52;
+    
+    pitchAbsoluteMin = 38;
+    pitchAbsoluteMax = 52;
     
     changedValue = 0;
+    
+    noteColor = Colours::red;
 }
 
 MidiSequenceViewer::~MidiSequenceViewer(){
@@ -55,7 +60,7 @@ void MidiSequenceViewer::resized(){
 }
 
 void MidiSequenceViewer::redrawMidiSequence(Graphics& g){
-    std::cout << "midi viewer redraw " << std::endl;
+    //std::cout << "midi viewer redraw " << std::endl;
     
     setPitchLimits();
     
@@ -92,7 +97,7 @@ void MidiSequenceViewer::redrawMidiSequence(Graphics& g){
             g.setColour(Colours::lightsteelblue);
         g.drawLine(viewerBox.getX()+oneNoteWidth*i, viewerBox.getY(), viewerBox.getX()+oneNoteWidth*i, viewerBox.getY()+viewerBox.getHeight());
     }
-    g.setColour(Colours::red);
+    g.setColour(noteColor);
     for (int i = 0; i < sequencePtr->getNumEvents(); i++){
         
         float tmpTime = sequencePtr->getEventTime(i);
@@ -125,8 +130,8 @@ float MidiSequenceViewer::getHeight(float pitch){
 void MidiSequenceViewer::setPitchLimits(){
     int tmpMin = getMinPitch();
     int tmpMax =  getMaxPitch();
-    pitchMin = tmpMin - tmpMin%12;
-    pitchMax = tmpMax + 12 - tmpMax%12;
+    pitchMin = std::min(tmpMin - tmpMin%12, pitchAbsoluteMin);
+    pitchMax = std::max(tmpMax + 12 - tmpMax%12, pitchAbsoluteMax);
     
 }
 

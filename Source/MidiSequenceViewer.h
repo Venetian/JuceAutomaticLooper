@@ -39,12 +39,17 @@ public:
     int pitchMin;
     int pitchMax;
     
+    //these are limits, so we will always show this much of the midi notes
+    int pitchAbsoluteMin, pitchAbsoluteMax;
+    
     void setPitchLimits();
     int getMinPitch();
     int getMaxPitch();
     
     //change this to uodate the viewer
     Value changedValue;
+    
+    Colour noteColor;
     
 };
 #endif /* defined(__JuceAbletonMidiFilePlayer__MidiSequenceViewer__) */

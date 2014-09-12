@@ -46,6 +46,7 @@
 //need to schedule note offs for each note on
 //looping might mean we exceed length of loop
 
+const bool printingOn = false;
 
 JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMessageList){
     
@@ -85,7 +86,7 @@ JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMess
     outputCheckIndex = 0;
     
     
-    midiViewer.setSequence(beatDefinedSequence);
+    midiViewer.setSequence(originalSequence);// beatDefinedSequence);
 
     patternSequencer.stepSequenceViewer.setSequence(beatDefinedSequence);
     
@@ -130,8 +131,6 @@ void JuceSequenceLoopPlayer::setSequence(const MidiMessageSequence& targetSequen
     patternSequencer.loadSequence(beatDefinedSequence);
     //note we count from zero beats
 }
-
-
 
 
 void JuceSequenceLoopPlayer::setLoopPointsBeats(float startLoop, float endLoop){
@@ -366,10 +365,14 @@ void JuceSequenceLoopPlayer::copyRecordedSequenceOver(){
         index--;
     }
     beatDefinedSequence.updateMatchedPairs();
-    std::cout << "RESULTING SEQ" << std::endl;
+    if (printingOn)
+        std::cout << "RESULTING SEQ" << std::endl;
     printSequenceEvents(beatDefinedSequence);
     
     patternSequencer.loadSequence(beatDefinedSequence);
+    //copy this to original sequence here
+    originalSequence = beatDefinedSequence;
+    originalSequence.updateMatchedPairs();
 }
 
 void JuceSequenceLoopPlayer::checkNoteOffs(){
@@ -381,7 +384,8 @@ void JuceSequenceLoopPlayer::checkNoteOffs(){
             msgPointer = scheduledEvents.getEventPointer(index);
             sendMessageOut(msgPointer->message);
             if (msgPointer->message.isNoteOnOrOff()){
-                std::cout << name << " sending note off " << msgPointer->message.getNoteNumber() << " at " << msgPointer->message.getTimeStamp() << std::endl;
+                if (printingOn)
+                    std::cout << name << " sending note off " << msgPointer->message.getNoteNumber() << " at " << msgPointer->message.getTimeStamp() << std::endl;
             }
             if (scheduledEvents.getEventPointer(index) != nullptr)
                 scheduledEvents.deleteEvent(index, false);
@@ -393,7 +397,8 @@ void JuceSequenceLoopPlayer::checkNoteOffs(){
 void JuceSequenceLoopPlayer::checkLoopRecordingEnded(const float& beatTime){
     if (recordingOn() && recordedNoteOffHappened){
         if (beatTime > lastRecordedBeatTime + 1.5){
-            std::cout << "END RECORDING?" << std::endl;
+            if (printingOn)
+                std::cout << "END RECORDING?" << std::endl;
             endRecording();
         }
             
@@ -423,16 +428,19 @@ void JuceSequenceLoopPlayer::checkOutput(float& lastBeatTime, const float& beatT
             //output event
 
             if (!recordingOn() && beatDefinedSequence.getEventPointer(outputCheckIndex)->message.isNoteOn()){
-                std::cout << name << ": NOTE_ON (" << outputCheckIndex << ")" << " channel " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getChannel() << ", pitch " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getNoteNumber() << " time " << tmpTime << std::endl;
+                if (printingOn)
+                    std::cout << name << ": NOTE_ON (" << outputCheckIndex << ")" << " channel " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getChannel() << ", pitch " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getNoteNumber() << " time " << tmpTime << std::endl;
                 
                 int offIndex = beatDefinedSequence.getIndexOfMatchingKeyUp(outputCheckIndex);
                 int millisScheduled = 0;
                 if (offIndex != -1){
-                    std::cout << "Off index " << offIndex << " time " << beatDefinedSequence.getEventTime(offIndex) << std::endl;
+                    if (printingOn)
+                        std::cout << "Off index " << offIndex << " time " << beatDefinedSequence.getEventTime(offIndex) << std::endl;
                 
                     float beatDifference = beatDefinedSequence.getEventTime(offIndex) - beatDefinedSequence.getEventTime(outputCheckIndex);
                     millisScheduled = *milliscounter + beatsToMillis(beatDifference);
-                    std::cout << name << "millis now " <<  *milliscounter << ", scheduled off time " << millisScheduled << std::endl;
+                    if (printingOn)
+                        std::cout << name << "millis now " <<  *milliscounter << ", scheduled off time " << millisScheduled << std::endl;
                     //int channel = beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getChannel();
                 }
                 
@@ -441,7 +449,8 @@ void JuceSequenceLoopPlayer::checkOutput(float& lastBeatTime, const float& beatT
                     MidiMessage m = beatDefinedSequence.getEventPointer(offIndex)->message;
                     addNoteOff(m, millisScheduled);
                 } else {
-                    std::cout << name << " STRANGE, POINTER DOESNT EXIST FOR index " << offIndex << " events " << beatDefinedSequence.getNumEvents() << std::endl;
+                    if (printingOn)
+                        std::cout << name << " STRANGE, POINTER DOESNT EXIST FOR index " << offIndex << " events " << beatDefinedSequence.getNumEvents() << std::endl;
                 }
                 
                 MidiMessage outMessage = beatDefinedSequence.getEventPointer(outputCheckIndex)->message;//debug to prevent pointer craching
@@ -449,7 +458,8 @@ void JuceSequenceLoopPlayer::checkOutput(float& lastBeatTime, const float& beatT
                     noteOutBeatTime = beatDefinedSequence.getEventTime(outputCheckIndex);
                 
             } else if (beatDefinedSequence.getEventPointer(outputCheckIndex)->message.isNoteOff()){
-                std::cout << name << ": NOTE_OFF (" << outputCheckIndex << ") pitch " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getNoteNumber() << " at " <<  tmpTime << ", millis " << *milliscounter << std::endl;
+                if (printingOn)
+                    std::cout << name << ": NOTE_OFF (" << outputCheckIndex << ") pitch " << beatDefinedSequence.getEventPointer(outputCheckIndex)->message.getNoteNumber() << " at " <<  tmpTime << ", millis " << *milliscounter << std::endl;
                 
             } else if (!recordingOn()){//changed recordingon to playback on
                 //so must be something else
@@ -480,7 +490,8 @@ void JuceSequenceLoopPlayer::addNoteOff(MidiMessage& message, int millisTime){
     MidiMessage m;
     m = message;
     m.setTimeStamp(millisTime);
-    std::cout << name << " note off " << m.getChannel() << " pitch " << m.getNoteNumber() << " time " << m.getTimeStamp() << std::endl;
+    if (printingOn)
+        std::cout << name << " note off " << m.getChannel() << " pitch " << m.getNoteNumber() << " time " << m.getTimeStamp() << std::endl;
     scheduledEvents.addEvent(m);
 //    MidiMessage(127, pitch, 0);
 }
@@ -511,10 +522,12 @@ void JuceSequenceLoopPlayer::newMidiMessage(const MidiMessage& message, float& b
     float tmp = lastMidiMessageInTime();
     
     const uint8* data = message.getRawData();
-    std::cout << name << " received " << (int)data[0] << ", " << (int)data[1] << ", " << (int)data[2];
-    std::cout << "at time " << beatTime << ", previous midi message time " << tmp << std::endl;
+    if (printingOn){
+        std::cout << name << " received " << (int)data[0] << ", " << (int)data[1] << ", " << (int)data[2];
+        std::cout << "at time " << beatTime << ", previous midi message time " << tmp << std::endl;
+    }
     
-    if (!stepSequencerMode())
+    if (!stepSequencerMode())//not recording notes to change pattern
         newRecordedMessageIn(message, beatTime);
     else
         newStepSequencerMessageIn(message, beatTime);
@@ -539,12 +552,14 @@ void JuceSequenceLoopPlayer::newRecordedMessageIn(const MidiMessage& message, fl
 //                recordingOn = true;
                 looperMode = LOOPING_RECORDING;
                 sendAllScheduledNoteOffs();
-                std::cout << name << "xsc RECORDING STARTED" << std::endl;
+                if (printingOn)
+                    std::cout << name << "xsc RECORDING STARTED" << std::endl;
                 recordedSequence.clear();
                 recordedNoteOffHappened = false;
 
             } else {
-                std::cout << "maybe this is hanging note?" << std::endl;
+                if (printingOn)
+                    std::cout << "maybe this is hanging note?" << std::endl;
                 //has been crash bug here
                 //needed? checkHangingNote(message, beatTime);
             }
@@ -558,13 +573,15 @@ void JuceSequenceLoopPlayer::newRecordedMessageIn(const MidiMessage& message, fl
             copyMessage.setTimeStamp(loopTime);//getLoopPosition(loopTime));
             recordedSequence.addEvent(copyMessage);
             const uint8* data = message.getRawData();
-            std::cout << name << " add recorded event " << (int)message.getNoteNumber() << ": midi " << (int)data[0] << ", " << (int)data[1] << ", at time " << beatTime << " loop time " << getLoopPosition(beatTime) << std::endl;
+            if (printingOn)
+                std::cout << name << " add recorded event " << (int)message.getNoteNumber() << ": midi " << (int)data[0] << ", " << (int)data[1] << ", at time " << beatTime << " loop time " << getLoopPosition(beatTime) << std::endl;
         
             
             if (message.isNoteOff()){
                 lastRecordedBeatTime = beatTime;
                 recordedNoteOffHappened = true;
-                std::cout << "LAST_RECORDED_BEAT_TIME " << beatTime << std::endl;
+                if (printingOn)
+                    std::cout << "LAST_RECORDED_BEAT_TIME " << beatTime << std::endl;
             }
         } else {
         //not note on or off - recording into the sequence - visualisation??
@@ -573,14 +590,17 @@ void JuceSequenceLoopPlayer::newRecordedMessageIn(const MidiMessage& message, fl
             copyMessage.setTimeStamp(getLoopPosition(loopTime));
             recordedSequence.addEvent(copyMessage);
             const uint8* data = message.getRawData();
-            std::cout << name << " add NON-NOTE recorded event: " << (int)data[0] << ", " << (int)data[1] << ", at time " << beatTime << " loop time " << loopTime << std::endl;
+            if (printingOn)
+                std::cout << name << " add NON-NOTE recorded event: " << (int)data[0] << ", " << (int)data[1] << ", at time " << beatTime << " loop time " << loopTime << std::endl;
             
         }
     } else{
         //i.e beattime < 0
         const uint8* data = message.getRawData();
-        std::cout << name << " midi " << (int)data[0] << ", " << (int)data[1] << ", at time " << getLoopPosition(beatTime) << std::endl;
-        std::cout << "out of time" << std::endl;
+        if (printingOn){
+            std::cout << name << " midi " << (int)data[0] << ", " << (int)data[1] << ", at time " << getLoopPosition(beatTime) << std::endl;
+            std::cout << "out of time" << std::endl;
+        }
     }
 }
 
@@ -590,7 +610,8 @@ void JuceSequenceLoopPlayer::newRecordedMessageIn(const MidiMessage& message, fl
 void JuceSequenceLoopPlayer::newStepSequencerMessageIn(const MidiMessage& message, float& beatTime){
     if (message.isNoteOnOrOff()){
         if (patternSequencer.playedMidiMessage(message)){
-            std::cout << name << "reload pattern" << std::endl;
+            if (printingOn)
+                std::cout << name << "reload pattern" << std::endl;
             
             patternSequencer.generateOutputSequence(beatDefinedSequence, patternSequencer.altPitchSet);
             int tmp = (int)patternSequencer.stepSequenceViewer.changedValue.getValue()+1;
@@ -607,7 +628,8 @@ float JuceSequenceLoopPlayer::quantise(const float& eventTime){
 void JuceSequenceLoopPlayer::checkHangingNote(const MidiMessage& message, float& beatTime){
     for (int i = beatDefinedSequence.getNumEvents()-1; i >= 0 ; i--){
         if (beatDefinedSequence.getIndexOfMatchingKeyUp(i) == -1 && beatDefinedSequence.getEventPointer(i)->message.isNoteOn() && message.getNoteNumber() == beatDefinedSequence.getEventPointer(i)->message.getNoteNumber()){
-            std::cout << "YES, GOT A MATCH for index " << i << " in sequence" << std::endl;
+            if (printingOn)
+                std::cout << "YES, GOT A MATCH for index " << i << " in sequence" << std::endl;
             MidiMessage copyMessage = message;
             copyMessage.setTimeStamp(getLoopPosition(beatTime) + loopEndBeats);//need to put it after end
             beatDefinedSequence.addEvent(copyMessage);
@@ -642,7 +664,8 @@ void JuceSequenceLoopPlayer::updateMidiPlayPositionToTickPosition(double startTi
                 int pitch = outputEvent->message.getNoteNumber();
                 
                 if (midiOutDevice != NULL){
-                    std::cout << name << ": Note OUT " << pitch << std::endl;
+                    if (printingOn)
+                        std::cout << name << ": Note OUT " << pitch << std::endl;
                     midiOutDevice->sendMessageNow(outputEvent->message);//..Out(outputEvent->message);
                 }
                 if (outputEvent->message.isNoteOn()){
@@ -650,40 +673,50 @@ void JuceSequenceLoopPlayer::updateMidiPlayPositionToTickPosition(double startTi
                     noteOnValue = pitch;
                     
                     int tmp = transformedSequence.getIndexOfMatchingKeyUp(midiPlayIndex);
-                    std::cout << "SequenceLooper " << name <<" NOTE ON  " << outputEvent->message.getNoteNumber();
-                    std::cout << " index " << midiPlayIndex << " has up key " << tmp;//<< std::endl;
-                    std::cout << ", tick position " << tickPosition << "beattick " << beatTick << std::endl;
+                    if (printingOn){
+                        std::cout << "SequenceLooper " << name <<" NOTE ON  " << outputEvent->message.getNoteNumber();
+                        std::cout << " index " << midiPlayIndex << " has up key " << tmp;//<< std::endl;
+                        std::cout << ", tick position " << tickPosition << "beattick " << beatTick << std::endl;
+                    }
                 } else {
-                    std::cout << "SequenceLooper: " << name << " NOTE Off " << pitch << " index " << midiPlayIndex << std::endl;
+                    if (printingOn)
+                        std::cout << "SequenceLooper: " << name << " NOTE Off " << pitch << " index " << midiPlayIndex << std::endl;
                 }
             }
             else if (outputEvent->message.isController()){
                 if (midiOutDevice != NULL)
                     midiOutDevice->sendMessageNow(outputEvent->message);
                 
-                std::cout << name << "event " << midiPlayIndex << "is controller " << outputEvent->message.getControllerNumber();
-                std::cout << " value " << outputEvent->message.getControllerValue() << std::endl;
-                
+                if (printingOn){
+                    std::cout << name << "event " << midiPlayIndex << "is controller " << outputEvent->message.getControllerNumber();
+                    std::cout << " value " << outputEvent->message.getControllerValue() << std::endl;
+                }
             } else if (outputEvent->message.isPitchWheel()){
                 if (midiOutDevice != NULL)
                     midiOutDevice->sendMessageNow(outputEvent->message);
                 
-                std::cout << "SequenceLooper: " << name << " PITCH WHEEL,  " << outputEvent->message.getPitchWheelValue();
-                std::cout << "tick position " << tickPosition << std::endl;
-                
+                if (printingOn){
+                    std::cout << "SequenceLooper: " << name << " PITCH WHEEL,  " << outputEvent->message.getPitchWheelValue();
+                    std::cout << "tick position " << tickPosition << std::endl;
+                }
             } else if (outputEvent->message.isAftertouch()){
                 if (midiOutDevice != NULL)
                     midiOutDevice->sendMessageNow(outputEvent->message);
-                
-                std::cout << "SequenceLooper: " << name << " AFTERTOUCH ,  " << outputEvent->message.getAfterTouchValue();
-                std::cout << "tick position " << tickPosition << std::endl;
+                if (printingOn){
+                    std::cout << "SequenceLooper: " << name << " AFTERTOUCH ,  " << outputEvent->message.getAfterTouchValue();
+                    std::cout << "tick position " << tickPosition << std::endl;
+                }
             } else {
                 
                 const uint8* data = outputEvent->message.getRawData();
-                if ((data[0] & 0xf0) == 0xd0)
-                    std::cout << name << " channel aftertouch  " << midiPlayIndex << " is not note on/off, data[0] " << (int)data[0] << std::endl;
-                else
-                    std::cout << name << " event " << midiPlayIndex << " is not note on/off, data[0] " << (int)data[0] << std::endl;
+                if ((data[0] & 0xf0) == 0xd0){
+                    if (printingOn)
+                        std::cout << name << " channel aftertouch  " << midiPlayIndex << " is not note on/off, data[0] " << (int)data[0] << std::endl;
+                }
+                else {
+                    if (printingOn)
+                        std::cout << name << " event " << midiPlayIndex << " is not note on/off, data[0] " << (int)data[0] << std::endl;
+                }
             }
         }//end if midiplayindex
         

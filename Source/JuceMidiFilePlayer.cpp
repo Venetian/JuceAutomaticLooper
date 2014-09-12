@@ -41,7 +41,7 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     int soloKey = 0;
     
     
-    int fileToLoad = 4;
+    int fileToLoad = 11;
     
     switch (fileToLoad){
         case 0:
@@ -84,6 +84,10 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
         case 10:
             moogLocation = "/Users/andrewrobertson/Music/HigamosSynchotron/ZeppelinMidi/led_zeppelin-black_dog.mid";
             key = 9;
+            break;
+        case 11:
+            moogLocation = "/Users/andrewrobertson/GitHub/JuceAutomaticLooper/midiclips/moogmidi.mid";
+            key = 5;
             break;
         
             
@@ -132,7 +136,9 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     
     prophet.midiViewer.setBounds(60, 350, 320, 100);
     looper.midiViewer.setBounds(400, 350, 320, 100);
-looper.patternSequencer.stepSequenceViewer.setBounds(400, 470, 320, 100);
+    looper.patternSequencer.stepSequenceViewer.setBounds(400, 470, 320, 100);
+    looper.patternSequencer.stepSequenceViewer.noteColor = Colours::dodgerblue;
+    
     //to view??
     looper.viewerValue = &midiViewerValue;
     prophet.viewerValue = &midiViewerValue;
