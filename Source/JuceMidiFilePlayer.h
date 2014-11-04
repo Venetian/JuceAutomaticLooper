@@ -62,6 +62,11 @@ public:
     void resized();
     
     Value midiViewerValue;//change it to redraw
+    
+    void newFootpedalMessage(const MidiMessage& m);
+    
+    void writeMidiTrack();
+    
 private:
     
     float playbackSpeed;
@@ -107,7 +112,7 @@ private:
     
     void bufferTest();//not needed
     
-    
+
 
 };
 #endif /* defined(__JuceAbletonMidiFilePlayer__JuceMidiFilePlayer__) */

@@ -80,7 +80,7 @@ public:
     MidiMessageArraySorter sorter;//for sorting these arrays
     int patternNotesPlayedOn;
     bool reload;
-    
+    bool wantToReplaceOriginal;
     MidiSequenceViewer stepSequenceViewer;
 
 //    MidiMessageArraySorter sorter;

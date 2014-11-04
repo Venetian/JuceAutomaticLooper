@@ -136,21 +136,28 @@ void MidiSequenceViewer::setPitchLimits(){
 }
 
 int MidiSequenceViewer::getMinPitch(){
-    pitchMin = 100;
-    for (int i = 0; i < sequencePtr->getNumEvents(); i++){
-        if (sequencePtr->getEventPointer(i)->message.isNoteOn() && sequencePtr->getEventPointer(i)->message.getNoteNumber() < pitchMin)
-            pitchMin = sequencePtr->getEventPointer(i)->message.getNoteNumber();
-    }
-    return pitchMin;
+    if (sequencePtr){
+        pitchMin = 100;
+        for (int i = 0; i < sequencePtr->getNumEvents(); i++){
+            if (sequencePtr->getEventPointer(i)->message.isNoteOn() && sequencePtr->getEventPointer(i)->message.getNoteNumber() < pitchMin)
+                pitchMin = sequencePtr->getEventPointer(i)->message.getNoteNumber();
+        }
+        return pitchMin;
+    } else
+        return 0;
+
 }
 
 int MidiSequenceViewer::getMaxPitch(){
-    pitchMax = 32;
-    for (int i = 0; i < sequencePtr->getNumEvents(); i++){
-        if (sequencePtr->getEventPointer(i)->message.isNoteOn() && sequencePtr->getEventPointer(i)->message.getNoteNumber() >pitchMax)
-            pitchMax = sequencePtr->getEventPointer(i)->message.getNoteNumber();
-    }
-    return pitchMax;
+    if (sequencePtr){
+        pitchMax = 32;
+        for (int i = 0; i < sequencePtr->getNumEvents(); i++){
+            if (sequencePtr->getEventPointer(i)->message.isNoteOn() && sequencePtr->getEventPointer(i)->message.getNoteNumber() >pitchMax)
+                pitchMax = sequencePtr->getEventPointer(i)->message.getNoteNumber();
+        }
+        return pitchMax;
+    } else
+    return 0;
 }
 
 

@@ -42,11 +42,16 @@
 
 
 
+//1. save - not yet
+//2. footpedal - lamost
+//3. quantize menu
+//4. more than one pattern?
+//5. loop length
 
 //need to schedule note offs for each note on
 //looping might mean we exceed length of loop
 
-const bool printingOn = false;
+const bool printingOn = true;
 
 JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMessageList){
     
@@ -92,7 +97,7 @@ JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMess
     
     recordedNoteOffHappened = false;//not really needed in setup
    
-    
+    midiNotesThru = false;
     
 }
 
@@ -282,10 +287,10 @@ void JuceSequenceLoopPlayer::alternativeUpdateToBeat(const float& newBeat){
 }
 
 void JuceSequenceLoopPlayer::endRecording(){
-    std::cout << name << ": xsc RECORDED_SEQUENCE" << std::endl;
+    std::cout << name << ": xsc END_RECORDED_SEQUENCE" << std::endl;
     printSequenceEvents(recordedSequence);
     
-    copyRecordedSequenceOver();
+    copyRecordedSequenceOver(); 
     if (recordingOn()){
         looperMode = LOOPING_PLAYBACK;
         std::cout << name << "reset to " << looperMode << std::endl;
@@ -496,8 +501,8 @@ void JuceSequenceLoopPlayer::addNoteOff(MidiMessage& message, int millisTime){
 //    MidiMessage(127, pitch, 0);
 }
 
-void JuceSequenceLoopPlayer::sendMessageOut(MidiMessage& m){
-    if (midiOutDevice != nullptr){// && m.isNoteOn())
+void JuceSequenceLoopPlayer::sendMessageOut(const MidiMessage& m){
+    if (m.getRawData() && midiOutDevice != nullptr){// && m.isNoteOn())
         
         midiOutDevice->sendMessageNow(m);
        
@@ -531,7 +536,11 @@ void JuceSequenceLoopPlayer::newMidiMessage(const MidiMessage& message, float& b
         newRecordedMessageIn(message, beatTime);
     else
         newStepSequencerMessageIn(message, beatTime);
-        
+    
+    if (!stepSequencerMode() && midiNotesThru)//then we are playing notes in so want to hear them
+        sendMessageOut(message);
+    else if(stepSequencerMode() && midiNotesThru && !message.isNoteOnOrOff())
+        sendMessageOut(message);//for control change messages such as filter sweep, resonance etc
     
 }
 
@@ -556,6 +565,8 @@ void JuceSequenceLoopPlayer::newRecordedMessageIn(const MidiMessage& message, fl
                     std::cout << name << "xsc RECORDING STARTED" << std::endl;
                 recordedSequence.clear();
                 recordedNoteOffHappened = false;
+                
+                
 
             } else {
                 if (printingOn)
@@ -753,7 +764,7 @@ void JuceSequenceLoopPlayer::printSequenceEvents(const MidiMessageSequence& sequ
         event = sequence.getEventPointer(i);
         
         //can get this time info from the track sequence
-        if (event->message.isNoteOnOrOff()){
+        if (event &&  event->message.isNoteOnOrOff()){
             double eventTime = sequence.getEventTime(i);
             std::cout << name << " print seq[" << i << "]: eventtime " << eventTime;// << std::endl;
             

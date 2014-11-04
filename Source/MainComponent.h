@@ -33,6 +33,8 @@ public:
     void resized();
 
 
+    ToggleButton toggle;
+    
     Value beatValue;
     Value sysTimeValue;
     Value tempoValue;
@@ -57,6 +59,8 @@ public:
     
     Value looperStepSeqValue;
     
+    
+    
     void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) ;
  //   void handleIncomingMidiMessageMoog (MidiInput* source, const MidiMessage& message) ;
     
@@ -70,6 +74,8 @@ private:
     
     ComboBox midiProphetInputBox;
     ComboBox midiMoogInputBox;
+    
+    ComboBox moogFootpedalInputBox;
     
     ComboBox moogLoopModeBox;
     ComboBox prophetLoopModeBox;
@@ -96,6 +102,7 @@ private:
     
     String moogInputName;//to help parse midi messages by channel
     String prophetInputName;
+    String footpedalInputName;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
 };

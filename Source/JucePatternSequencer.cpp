@@ -13,7 +13,8 @@ const bool printingOn = false;
 
 
 JucePatternSequencer::JucePatternSequencer(){
-
+    wantToReplaceOriginal = false;
+    
     loopMax = nullptr;
     loopMin = nullptr;
     
@@ -83,6 +84,10 @@ void JucePatternSequencer::loadSequence(MidiMessageSequence& sequence){
     if (printingOn)
         std::cout << "REORDER" << std::endl;
     reorderPitchSetAndRhythm();
+    
+    //anr new line
+    altPitchSet.clear();
+    altPitchSet = pitchSet;//the alt one is the one we replace notes in
     
 }
 
@@ -215,8 +220,11 @@ void JucePatternSequencer::printMidiMessageArray(Array<MidiMessage>& pitchArray)
 
 
 void JucePatternSequencer::generateAlternativePitches(Array<MidiMessage>& newNotes){
-    altPitchSet.clear();
-    altPitchSet = pitchSet;//the original notes
+    
+    if (wantToReplaceOriginal){
+        altPitchSet.clear();
+        altPitchSet = pitchSet;//the original notes
+    }
     altPitchSet.sort(sorter);
     newNotes.sort(sorter);
     if (printingOn)

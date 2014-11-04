@@ -19,9 +19,9 @@
 #define EIGHTH_NOTES 2
 #define SIXTEENTH_NOTES 4
 //#include "JuceMidiFilePlayer.h"
-
-#define LOOPING_PLAYBACK 1
-#define LOOPING_RECORDING 2
+   
+#define LOOPING_PLAYBACK 1//RECORD IN THIS MODE
+#define LOOPING_RECORDING 2//IT KNOWS IT IS RECORDING
 #define STEP_SEQUENCER 3
 #define KEY_MODULATION 4
 
@@ -90,6 +90,8 @@ private:
 
 
 class JuceSequenceLoopPlayer: private AsyncUpdater {
+    
+  
 //friend class JuceMidiFilePlayer;
     //asyncupdater is triggered when new midi message added to our list box above (grabbed from juce demo)
     //so we see the midi messages input
@@ -166,7 +168,7 @@ public:
     
     ListBox messageListBox;
     MidiLogListBoxModel midiLogListBoxModel;
-    
+    ListBox midiFootpedalInputListbox;//for controlling between play and stepsequencer mode
     
     //not particularly keen on this one but
     int* milliscounter;
@@ -185,15 +187,19 @@ public:
     
     void setMode(int mode);
     
-//protected:
-    JucePatternSequencer patternSequencer;
 
+    JucePatternSequencer patternSequencer;
+    
+    bool midiNotesThru;//let midi through while playing
+    //good if using controller or can have keyboard not use internal midi
+protected:
+    
 private:
     Array<MidiMessage> midiMessageList;
     
     MidiMessageSequence originalSequence;
     
-    void sendMessageOut(MidiMessage& m);
+    void sendMessageOut(const MidiMessage& m);
     
     int invertAnchor;
     int invertScale[8];
@@ -261,6 +267,7 @@ private:
     
     bool copyOnlyNoteOnAndOffs;
     
+
     
     //new pattern stuff
 

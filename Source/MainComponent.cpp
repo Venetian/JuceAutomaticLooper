@@ -14,7 +14,7 @@
 #define OSC_RECEIVER_PORT 12178
 //==============================================================================
 MainContentComponent::MainContentComponent() : finder("abletonSync", OSC_RECEIVER_PORT),
-prophetButton("prophet reverse")// deviceManager()
+prophetButton("prophet reverse"), toggle("thru")// deviceManager()
 {
     setSize (800, 600);
 
@@ -144,6 +144,15 @@ prophetButton("prophet reverse")// deviceManager()
     midiProphetInputBox.setSelectedId(2);
 
     
+    addAndMakeVisible(moogFootpedalInputBox);
+    moogFootpedalInputBox.setTextWhenNoChoicesAvailable ("No MIDI Input");
+    moogFootpedalInputBox.addItemList (midiInputs, 1);
+    moogFootpedalInputBox.addListener (this);
+    moogFootpedalInputBox.setSelectedId(2);
+    footpedalInputName = MidiInput::getDevices()[moogFootpedalInputBox.getSelectedItemIndex()];
+    
+    
+    
     lastBeatIndex = -1;//to recognise new beat info
     
     //add message box for looper
@@ -171,6 +180,9 @@ prophetButton("prophet reverse")// deviceManager()
     //revise the value
     //moogModeValue.setValue(moogLoopModeBox.getSelectedItemIndex());
     
+    toggle.addListener(this);
+    addAndMakeVisible(&toggle);
+    
     
     
     resized();//at bottom of setup
@@ -183,6 +195,8 @@ MainContentComponent::~MainContentComponent()
     midiLooperOutputBox.removeListener(this);
     midiProphetInputBox.removeListener(this);
     midiMoogInputBox.removeListener(this);
+    
+    moogFootpedalInputBox.removeListener(this);
     
 //last input below was
     deviceManager.removeMidiInputCallback (MidiInput::getDevices()[midiMoogInputBox.getSelectedItemIndex()], this);
@@ -247,11 +261,12 @@ unsigned long systemTime(){
 }
 
 void MainContentComponent::newAbletonBeatReceived(float beatIndex, float tempo, unsigned long systemTimeAbleton){
-    std::cout << "MCC: beat " << beatIndex << " tempo " << tempo << std::endl;
+    std::cout << "MCC: beat " << beatIndex << " tempo " << tempo << " sys time " << systemTimeAbleton << std::endl;
     
     //some latency calculations, in case our osc message is over a network etc
     unsigned long systemTimeHere = systemTime();
     int latency = systemTimeHere - systemTimeAbleton;
+    
     if (abs(latency) > 50){
         std::cout << "weird latency error " << latency << " with system time " << systemTimeHere << " so setting to zero " << std::endl;
         latency = 0;
@@ -310,6 +325,11 @@ void MainContentComponent::comboBoxChanged(ComboBox* box)//override
         //, "prophet");
     } else if (box == &moogLoopModeBox){
         midiPlayer.looper.setMode(moogLoopModeBox.getSelectedItemIndex());
+    } else if (box == &moogFootpedalInputBox){
+        std::cout << "FOOTPEDAL BOX CHANGED" << std::endl;
+        setMidiInput(moogFootpedalInputBox.getSelectedItemIndex());
+        footpedalInputName = MidiInput::getDevices()[moogFootpedalInputBox.getSelectedItemIndex()];
+        //midiPlayer.looper.setFootpedalInput(moogFootpedalInputBox.getSelectedItemIndex());
     }
     
     
@@ -330,6 +350,9 @@ void MainContentComponent::handleIncomingMidiMessage (MidiInput* source, const M
         midiPlayer.looper.newMidiMessage(message, tmpTimeNow);
     else if (source->getName() == prophetInputName)
         midiPlayer.prophet.newMidiMessage(message, tmpTimeNow);
+    
+    if (source->getName() == footpedalInputName)
+        midiPlayer.newFootpedalMessage(message);
 
 }
 
@@ -385,6 +408,13 @@ void MainContentComponent::buttonClicked(Button* button){
         std::cout << "set prophet value " << newVal << std::endl;
         prophetReversedValue.setValue(newVal);
     }
+    
+    if (button == &toggle){
+        std::cout << "Toggle " << std::endl;
+        midiPlayer.looper.midiNotesThru = !midiPlayer.looper.midiNotesThru;
+    }
+    
+    
     repaint();
 }
 
@@ -401,6 +431,8 @@ void MainContentComponent::paint (Graphics& g)
     midiPlayer.looper.midiViewer.draw(g);
     
     midiPlayer.looper.patternSequencer.stepSequenceViewer.draw(g);
+    
+    
 }
 
 void MainContentComponent::resized()
@@ -424,18 +456,23 @@ void MainContentComponent::resized()
     
     
     float moogX = 0.5;
-    
+    float moogWidth = 0.3;
     looperLabel.setBoundsRelative(moogX, prophetY, 0.4, 0.05);
-    midiMoogInputBox.setBoundsRelative(moogX,prophetY+height,0.3,0.05);
-    midiLooperOutputBox.setBoundsRelative(moogX, prophetY+2*height, 0.3, 0.05);
+    midiMoogInputBox.setBoundsRelative(moogX,prophetY+height, moogWidth,0.05);
+    midiLooperOutputBox.setBoundsRelative(moogX, prophetY+2*height, moogWidth, 0.05);
 
+    moogFootpedalInputBox.setBoundsRelative(moogX,prophetY+4*height+0.15, moogWidth,0.05);
     
     Rectangle<int> area (getLocalBounds());
-    midiPlayer.looper.messageListBox.setBoundsRelative(moogX, prophetY+4*height, 0.4, 0.15);
+    midiPlayer.looper.messageListBox.setBoundsRelative(moogX, prophetY+4*height, 0.4, 0.125);
     
-    midiPlayer.prophet.messageListBox.setBoundsRelative(prophetX, prophetY+4*height, 0.4, 0.15);
+    midiPlayer.prophet.messageListBox.setBoundsRelative(prophetX, prophetY+4*height, 0.4, 0.125);
     
-    moogLoopModeBox.setBoundsRelative(moogX, prophetY, 0.2, 0.05);
+   
+    
+    float inputWidth = 0.2;
+    moogLoopModeBox.setBoundsRelative(moogX, prophetY, inputWidth, 0.05);
+    toggle.setBoundsRelative(moogX + inputWidth+0.02, prophetY-0.02, 0.1, 0.1);
     
     midiPlayer.resized();
 }

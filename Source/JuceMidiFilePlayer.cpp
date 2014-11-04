@@ -41,7 +41,7 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     int soloKey = 0;
     
     
-    int fileToLoad = 11;
+    int fileToLoad = 8;
     
     switch (fileToLoad){
         case 0:
@@ -75,7 +75,7 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
             break;
         case 8:
             //location = "/Users/andrewrobertson/Music/HigamosSynchotron/comm_solo.mid";
-            moogLocation = "../../../../exampleMidiFiles/KingKongBassline.mid";
+            moogLocation = "/Users/andrewrobertson/Music/Logic/whethamRiff.mid";
             key = 2;
             break;
         case 9:
@@ -853,6 +853,36 @@ void JuceMidiFilePlayer::bufferTest(){
         }
 
 }
+
+void JuceMidiFilePlayer::newFootpedalMessage(const MidiMessage& m){
+  //  std::cout << "FOOTPEDAL";
+    //const uint8* data = m.getRawData();
+//    std::cout << ":, data[0] " << (int)data[0] << " [1]: " << (int)data[1] << " [2]: " <<    (int)data[2] << std::endl;
+
+ /*   if (m.isNoteOff() && m.getNoteNumber() == 40){
+        std::cout << "writetrack" << std::endl;
+        writeMidiTrack();
+    }
+*/
+}
+
+void JuceMidiFilePlayer::writeMidiTrack(){
+    //problem with header - not working yet
+    
+    
+    //http://www.juce.com/forum/topic/read-and-write-midi-files
+    MidiFile newMidiFile;
+    newMidiFile.addTrack(looper.beatDefinedSequence);
+    
+    String path = "/Users/andrewrobertson/testmidijuce.mid";
+    File myFile = File::createFileWithoutCheckingPath (path); //Not suggested to use this method exactly - just for show
+    FileOutputStream myStream (myFile);
+    
+    newMidiFile.writeTo (myStream);
+    
+    
+}
+
 
 /*
 loopTest{
