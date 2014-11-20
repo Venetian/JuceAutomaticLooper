@@ -120,7 +120,7 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
     
     //set right hand midi channels
     midiMoogInputBox.setSelectedId(3);
-    midiLooperOutputBox.setSelectedId(3);
+    midiLooperOutputBox.setSelectedId(1);
     
     
     // find the first enabled device and use that bu default
@@ -176,6 +176,16 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
 	//const StringArray midiLooperOutputs (MidiOutput::getDevices());
 	//midiLooperOutputBox.addItemList (midiLooperOutputs, 1);
 	moogLoopModeBox.addListener (this);
+    
+    
+    addAndMakeVisible (loopLengthBarBox);
+    loopLengthBarBox.setTextWhenNoChoicesAvailable ("bar length");
+    loopLengthBarBox.addItem("ONE BAR", 1);
+    loopLengthBarBox.addItem("TWO BARS", 2);
+    loopLengthBarBox.addItem("FOUR BARS", 3);
+    loopLengthBarBox.addItem("EIGHT BARS", 4);
+    loopLengthBarBox.setSelectedItemIndex(1);
+    loopLengthBarBox.addListener (this);
     
     //revise the value
     //moogModeValue.setValue(moogLoopModeBox.getSelectedItemIndex());
@@ -330,6 +340,23 @@ void MainContentComponent::comboBoxChanged(ComboBox* box)//override
         setMidiInput(moogFootpedalInputBox.getSelectedItemIndex());
         footpedalInputName = MidiInput::getDevices()[moogFootpedalInputBox.getSelectedItemIndex()];
         //midiPlayer.looper.setFootpedalInput(moogFootpedalInputBox.getSelectedItemIndex());
+    } else if (box == &loopLengthBarBox){
+        std::cout << "bar length " << std::endl;
+        switch (loopLengthBarBox.getSelectedItemIndex()){
+            case 1:
+                midiPlayer.setBarLength(1);
+                break;
+            case 2:
+                midiPlayer.setBarLength(2);
+                break;
+            case 3:
+                midiPlayer.setBarLength(4);
+                break;
+            case 4:
+                midiPlayer.setBarLength(8);
+                break;
+        }
+        
     }
     
     
@@ -424,7 +451,9 @@ void MainContentComponent::paint (Graphics& g)
 
     g.setFont (Font (16.0f));
     g.setColour (Colours::black);
-    g.drawText ("listening on "+String(OSC_RECEIVER_PORT), getLocalBounds(), Justification::top, true);
+//    g.drawText ("listening on "+String(OSC_RECEIVER_PORT), getLocalBounds(), Justification::top, true);
+
+    g.drawText(midiPlayer.looper.loopMethod, getLocalBounds(), Justification::top, true);
     //g.drawText (beatInfo.getText(), getLocalBounds(), Justification::topLeft, true);
     
     midiPlayer.prophet.midiViewer.draw(g);
@@ -473,6 +502,8 @@ void MainContentComponent::resized()
     float inputWidth = 0.2;
     moogLoopModeBox.setBoundsRelative(moogX, prophetY, inputWidth, 0.05);
     toggle.setBoundsRelative(moogX + inputWidth+0.02, prophetY-0.02, 0.1, 0.1);
+    
+    loopLengthBarBox.setBoundsRelative(moogX, prophetY+3*height, inputWidth, 0.05);
     
     midiPlayer.resized();
 }

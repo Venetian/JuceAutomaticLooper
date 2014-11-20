@@ -191,6 +191,7 @@ public:
     JucePatternSequencer patternSequencer;
     
     bool midiNotesThru;//let midi through while playing
+    String loopMethod;
     //good if using controller or can have keyboard not use internal midi
 protected:
     
@@ -242,8 +243,24 @@ private:
     
     void addNoteOff(MidiMessage& message, int millisTime);
     void checkNoteOffs();
+    
+    //*! cheap way to check if recording ended
     void checkLoopRecordingEnded(const float& beatTime);
-    void endRecording();
+    //*! predictive method
+    bool checkPredictedLoopRecordingEnded(const float& beatTime);
+    
+    //*! first note on time in a sequence
+    float firstEventTime(const MidiMessageSequence& sequence);
+    
+    bool cantFindNoteOnAfter(const MidiMessageSequence& sequence, const int& pitch, const float& beatTime);
+
+    //*! Find index of matching note of same pitch that occurs after specified time
+    int firstIndexOfMatchingNoteOnAfter(const MidiMessageSequence& sequence, const int& pitch, const float& beatTime);
+    
+    //*! returns index of note on if we can find a match to pitch and time, and -1 if not
+    int canFindNoteOn(const MidiMessageSequence& sequence, const int& pitch, const float& time);
+    
+    void endRecording(const float beatTime);
     void copyRecordedSequenceOver();
     
     bool checkLock;
@@ -292,5 +309,7 @@ private:
         }
     }
     
+    float stoppedRecordingTime;
+
 };
 #endif /* defined(__JuceAbletonMidiFilePlayer__JuceSequenceLoopPlayer__) */

@@ -41,7 +41,7 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     int soloKey = 0;
     
     
-    int fileToLoad = 8;
+    int fileToLoad = 11;
     
     switch (fileToLoad){
         case 0:
@@ -87,6 +87,10 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
             break;
         case 11:
             moogLocation = "/Users/andrewrobertson/GitHub/JuceAutomaticLooper/midiclips/moogmidi.mid";
+            key = 5;
+            break;
+        case 12:
+            moogLocation = "/Users/andrewrobertson/music/MIDI/Harold Faltermeyer - Axel F 3.mid";
             key = 5;
             break;
         
@@ -881,6 +885,11 @@ void JuceMidiFilePlayer::writeMidiTrack(){
     newMidiFile.writeTo (myStream);
     
     
+}
+
+void JuceMidiFilePlayer::setBarLength(int newLength){
+    looper.setLoopPointsBeats(0, 8*newLength);
+    prophet.setLoopPointsBeats(0, 8*newLength);
 }
 
 

@@ -80,6 +80,8 @@ private:
     ComboBox moogLoopModeBox;
     ComboBox prophetLoopModeBox;
     
+    ComboBox loopLengthBarBox;
+    
     TextButton prophetButton;
     Value prophetReversedValue;
     void buttonClicked(Button* button);

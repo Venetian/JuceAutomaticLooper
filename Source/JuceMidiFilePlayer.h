@@ -67,6 +67,8 @@ public:
     
     void writeMidiTrack();
     
+    void setBarLength(int newLength);
+    
 private:
     
     float playbackSpeed;
