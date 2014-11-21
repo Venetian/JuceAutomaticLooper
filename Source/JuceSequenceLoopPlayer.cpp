@@ -51,7 +51,7 @@
 //need to schedule note offs for each note on
 //looping might mean we exceed length of loop
 
-const bool printingOn = true;
+const bool printingOn = false;
 
 JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMessageList){
     
@@ -101,6 +101,8 @@ JuceSequenceLoopPlayer::JuceSequenceLoopPlayer() : midiLogListBoxModel (midiMess
     
     stoppedRecordingTime = 0;
     loopMethod = "no loop yet";
+    
+    smartDelayBeats = 0.1;
 }
 
 JuceSequenceLoopPlayer::~JuceSequenceLoopPlayer(){
@@ -288,6 +290,7 @@ void JuceSequenceLoopPlayer::alternativeUpdateToBeat(const float& newBeat){
         std::cout << "stop_fancy" << std::endl;
         endRecording(newBeat);
         loopMethod = "Fancy";
+        //now schedule the predicted note
     }
     
     
@@ -443,7 +446,7 @@ bool JuceSequenceLoopPlayer::checkPredictedLoopRecordingEnded(const float& beatT
                     int pitch = recordedSequence.getEventPointer(index)->message.getNoteNumber();
                     //std::cout << "note off " << index << " time " << offTime << ", pitch " << pitch << std::endl;
                     //so we have a note off
-                    if (beatTime - offTime > 0.1) {
+                    if (beatTime - offTime > 0.05) {
                         //check for the note on
                         int onIndex = index-1;
                         //cycle back to find the matching note on
@@ -457,40 +460,54 @@ bool JuceSequenceLoopPlayer::checkPredictedLoopRecordingEnded(const float& beatT
                         //it must match the recently played loop
                         recentEventOnPitch = pitch;
                         std::string isOn = recordedSequence.getEventPointer(onIndex)->message.isNoteOn()?"note_on":"note_off";
-                        std::cout << "\nrecent note on pitch " << pitch << " time " << onTime << ", index " << onIndex << " " << isOn << std::endl;
+                        //std::cout << "\nrecent note on pitch " << pitch << " time " << onTime << ", index " << onIndex << " " << isOn << std::endl;
                         
                         //so firstly can we find matching note on
                         int matchingIndex = canFindNoteOn(recordedSequence, pitch, onTime-loopWidthBeats);
                         if (matchingIndex > -1) {
                             //so we found one
-                            std::cout << "matching_index " << matchingIndex << ", pitch " << recordedSequence. getEventPointer(matchingIndex)->message.getNoteNumber() << ", time " << recordedSequence.getEventTime(matchingIndex) << std::endl;
+                            //std::cout << "matching_index " << matchingIndex << ", pitch " << recordedSequence. getEventPointer(matchingIndex)->message.getNoteNumber() << ", time " << recordedSequence.getEventTime(matchingIndex) << std::endl;
                             //so have we missed the next note on
                             //find teh next expected time
                             int nextNoteOnIndex = matchingIndex + 1;
-                            while (nextNoteOnIndex < recordedSequence.getNumEvents() && !recordedSequence.getEventPointer(nextNoteOnIndex)->message.isNoteOn()) {
+                            while (nextNoteOnIndex < recordedSequence.getNumEvents()
+                                   && (!recordedSequence.getEventPointer(nextNoteOnIndex)->message.isNoteOn())
+//                                       && recordedSequence.getEventTime(nextNoteOnIndex) > onTime)
+                                   ) {
                                 nextNoteOnIndex++;
                             }
                             if (nextNoteOnIndex < recordedSequence.getNumEvents()) {
                                 float predictedTime = recordedSequence.getEventTime(nextNoteOnIndex);
                                 int predictedPitch = recordedSequence.getEventPointer(nextNoteOnIndex)->message.getNoteNumber();
-                                std::cout << "predicted note on at " << predictedTime << ", width " << loopWidthBeats << " pitch " << predictedPitch << " time now " << beatTime << std::endl;
+                                //std::cout << "predicted note on at " << predictedTime << ", width " << loopWidthBeats << " pitch " << predictedPitch << " time now " << beatTime << std::endl;
                                 //we know that the last note off was what happened
                                 //if we find that the time now is past the prediction and
                                 //the prediction for sure didnt happen
-                                if (beatTime  > predictedTime + loopWidthBeats + 0.15) {//i.e. now is later than expected time plus a little delay to wait and see
-                                    std::cout << "expected " << predictedTime + loopWidthBeats << ", predicted note time after " << beatTime << std::endl;
+                                if (beatTime  > predictedTime + loopWidthBeats + smartDelayBeats) {//i.e. now is later than expected time plus a little delay to wait and see
+                                    //std::cout << "expected " << predictedTime + loopWidthBeats << ", predicted note time after " << beatTime << std::endl;
                                     bool cantFindMatch = cantFindNoteOnAfter(recordedSequence, predictedPitch, predictedTime + loopWidthBeats - 1);
                                     int recentIndex = firstIndexOfMatchingNoteOnAfter(recordedSequence, predictedPitch, predictedTime + loopWidthBeats - 1);
                                     if (recentIndex >= 0) {
-                                        std::cout << " num events " << recordedSequence.getNumEvents() << std::endl;
-                                    std::cout << "matching recent index " << recentIndex << " time " << recordedSequence.getEventTime(recentIndex) << " pitch " << recordedSequence.getEventPointer(recentIndex)->message.getNoteNumber() << std::endl;
+                                        //std::cout << " num events " << recordedSequence.getNumEvents() << std::endl;
+                                        //std::cout << "matching recent index " << recentIndex << " time " << recordedSequence.getEventTime(recentIndex) << " pitch " << recordedSequence.getEventPointer(recentIndex)->message.getNoteNumber() << std::endl;
                                     } else
-                                        std::cout << "NO MATCHIN INDEX FOR PITCH >> " << predictedPitch << std::endl;
+                                        //std::cout << "NO MATCHIN INDEX FOR PITCH >> " << predictedPitch << std::endl;
                                     String found = cantFindMatch?" CANT FIND":" FOUND MATCH";
-                                    std::cout << "predicted note time after " << beatTime <<  found << std::endl;
+                                    //std::cout << "predicted note time after " << beatTime <<  found << std::endl;
                                     if (cantFindMatch) {
                                         stopRecording = true;
-                                        std::cout << "STOP_FANCY_WAY" << beatTime << std::endl;
+                                        //std::cout << "STOP_FANCY_WAY" << beatTime << std::endl;
+                                        
+                                        //need to send out the note we just failed to see played
+                                        recordedSequence.updateMatchedPairs();
+                                        float messageLengthBeats = recordedSequence.getEventTime(recordedSequence.getIndexOfMatchingKeyUp(nextNoteOnIndex));
+                                        
+                                        messageLengthBeats -= recordedSequence.getEventTime(nextNoteOnIndex);
+                                        //std::cout << "message has LENGTH " << messageLengthBeats << std::endl;
+                                        scheduleNoteOnAndOff(recordedSequence.getEventPointer(nextNoteOnIndex)->message, messageLengthBeats);
+                                        
+                                        
+                                        
                                     } else {
                                         
                                     }
@@ -621,7 +638,7 @@ void JuceSequenceLoopPlayer::checkOutput(float& lastBeatTime, const float& beatT
                         std::cout << name << " STRANGE, POINTER DOESNT EXIST FOR index " << offIndex << " events " << beatDefinedSequence.getNumEvents() << std::endl;
                 }
                 
-                MidiMessage outMessage = beatDefinedSequence.getEventPointer(outputCheckIndex)->message;//debug to prevent pointer craching
+                MidiMessage outMessage = beatDefinedSequence.getEventPointer(outputCheckIndex)->message;//debug to prevent pointer crashing
                 sendMessageOut(outMessage);
                     noteOutBeatTime = beatDefinedSequence.getEventTime(outputCheckIndex);
                 
@@ -653,15 +670,27 @@ float millisToBeats(){
 //}
 
 
-void JuceSequenceLoopPlayer::addNoteOff(MidiMessage& message, int millisTime){
+void JuceSequenceLoopPlayer::addNoteOff(const MidiMessage& message, int millisTime){
     //std::cout << "channel is " <<
     MidiMessage m;
     m = message;
     m.setTimeStamp(millisTime);
+
     if (printingOn)
         std::cout << name << " note off " << m.getChannel() << " pitch " << m.getNoteNumber() << " time " << m.getTimeStamp() << std::endl;
     scheduledEvents.addEvent(m);
 //    MidiMessage(127, pitch, 0);
+}
+
+void JuceSequenceLoopPlayer::scheduleNoteOnAndOff(const MidiMessage& message, float durationBeats){
+    sendMessageOut(message);
+    MidiMessage messageOff(128, message.getNoteNumber(), 0);
+    //messageOff.setNoteNumber(message.getNoteNumber());
+    //messageOff.setVelocity(0);
+    messageOff.setTimeStamp(*milliscounter + beatsToMillis(durationBeats));
+    
+    addNoteOff(messageOff, *milliscounter + beatsToMillis(durationBeats));
+
 }
 
 void JuceSequenceLoopPlayer::sendMessageOut(const MidiMessage& m){

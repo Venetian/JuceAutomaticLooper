@@ -241,7 +241,12 @@ private:
     int beatsToMillis(float& beats);
    // float millisToBeats(float& millis);
     
-    void addNoteOff(MidiMessage& message, int millisTime);
+    void addNoteOff(const MidiMessage& message, int millisTime);
+    
+    //|* send note out and set up a scheduled note off
+    void scheduleNoteOnAndOff(const MidiMessage& message, float durationBeats);
+    
+    //*! check scheduled note offs??
     void checkNoteOffs();
     
     //*! cheap way to check if recording ended
@@ -308,6 +313,9 @@ private:
             seq.getEventPointer(i)->message.setChannel(channel);
         }
     }
+    
+    //*!delay in beats for a message to trigger
+    float smartDelayBeats;
     
     float stoppedRecordingTime;
 
