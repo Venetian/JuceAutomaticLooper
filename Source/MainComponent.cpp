@@ -60,9 +60,10 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
     looperStepSeqValue.referTo(midiPlayer.looper.patternSequencer.stepSequenceViewer.changedValue);
     looperStepSeqValue.addListener(this);
     
-    //prophetNoteValue.setValue(-1);
+    /*
     prophetNoteValue.addListener(this);
     prophetNoteValue.referTo(midiPlayer.prophet.noteOnValue);
+    */
     
     //add text for ableton sync
     beatInfo.setText("info", sendNotification);
@@ -78,19 +79,22 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
     addAndMakeVisible(&tempoInfo);
     
     //labels listen out to values within the midi classes
+    /*
     prophetLabel.setText("prophet info", sendNotification);
     prophetLabel.addListener(this);
     addAndMakeVisible(&prophetLabel);
+    */
     
     looperLabel.setText("looper info", sendNotification);
     looperLabel.addListener(this);
     addAndMakeVisible(&looperLabel);
     
+    /*
     prophetButton.addListener(this);
     addAndMakeVisible(&prophetButton);
     prophetReversedValue.addListener(this);
     prophetReversedValue.referTo(midiPlayer.prophet.reversedValue);
-    
+    */
     //add midi menu
     addAndMakeVisible (midiProphetOutputBox);
 	midiProphetOutputBox.setTextWhenNoChoicesAvailable ("No MIDI Output Enabled");
@@ -132,7 +136,7 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
             break;
         }
     }
-    
+    /*
     addAndMakeVisible(midiProphetInputBox);
     midiProphetInputBox.setTextWhenNoChoicesAvailable ("No MIDI Input");
     midiProphetInputBox.addItemList (midiInputs, 1);
@@ -142,7 +146,7 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
     //set left hand midi channels
     midiProphetOutputBox.setSelectedId(2);
     midiProphetInputBox.setSelectedId(2);
-
+     */
     
     addAndMakeVisible(moogFootpedalInputBox);
     moogFootpedalInputBox.setTextWhenNoChoicesAvailable ("No MIDI Input");
@@ -161,11 +165,13 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
     midiPlayer.looper.messageListBox.setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
     midiPlayer.looper.messageListBox.setColour (ListBox::outlineColourId, Colours::black);
     
+    /*
     addAndMakeVisible (midiPlayer.prophet.messageListBox);
     midiPlayer.prophet.messageListBox.setModel (&midiPlayer.prophet.midiLogListBoxModel);
     midiPlayer.prophet.messageListBox.setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
     midiPlayer.prophet.messageListBox.setColour (ListBox::outlineColourId, Colours::black);
-
+     */
+    
     addAndMakeVisible (moogLoopModeBox);
 	moogLoopModeBox.setTextWhenNoChoicesAvailable ("No Mode Added");
     moogLoopModeBox.addItem("PLSYBACK", 1);
@@ -201,11 +207,12 @@ prophetButton("prophet reverse"), toggle("thru")// deviceManager()
 MainContentComponent::~MainContentComponent()
 {
     //need this stuff??
-    midiProphetOutputBox.removeListener(this);
-    midiLooperOutputBox.removeListener(this);
-    midiProphetInputBox.removeListener(this);
-    midiMoogInputBox.removeListener(this);
+//  midiProphetOutputBox.removeListener(this);
+  //midiProphetInputBox.removeListener(this);
     
+    midiMoogInputBox.removeListener(this);
+    midiLooperOutputBox.removeListener(this);
+
     moogFootpedalInputBox.removeListener(this);
     
 //last input below was
@@ -477,12 +484,11 @@ void MainContentComponent::resized()
 
     float prophetY = 0.06;
     float height = 0.06;
-    prophetLabel.setBoundsRelative(prophetX, prophetY, 0.4, 0.05);
-    midiProphetInputBox.setBoundsRelative(prophetX, prophetY+height, 0.3, 0.05);
-    midiProphetOutputBox.setBoundsRelative(prophetX,prophetY+2*height,0.3,0.05);
-    
-    prophetButton.setBoundsRelative(prophetX, prophetY+0.18, 0.25, 0.05);
-    
+    //prophetLabel.setBoundsRelative(prophetX, prophetY, 0.4, 0.05);
+    //midiProphetInputBox.setBoundsRelative(prophetX, prophetY+height, 0.3, 0.05);
+    //midiProphetOutputBox.setBoundsRelative(prophetX,prophetY+2*height,0.3,0.05);
+    //prophetButton.setBoundsRelative(prophetX, prophetY+0.18, 0.25, 0.05);
+
     
     float moogX = 0.5;
     float moogWidth = 0.3;
@@ -495,9 +501,9 @@ void MainContentComponent::resized()
     Rectangle<int> area (getLocalBounds());
     midiPlayer.looper.messageListBox.setBoundsRelative(moogX, prophetY+4*height, 0.4, 0.125);
     
-    midiPlayer.prophet.messageListBox.setBoundsRelative(prophetX, prophetY+4*height, 0.4, 0.125);
     
-   
+    //midiPlayer.prophet.messageListBox.setBoundsRelative(prophetX, prophetY+4*height, 0.4, 0.125);
+
     
     float inputWidth = 0.2;
     moogLoopModeBox.setBoundsRelative(moogX, prophetY, inputWidth, 0.05);

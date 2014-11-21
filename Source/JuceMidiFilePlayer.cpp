@@ -138,14 +138,16 @@ JuceMidiFilePlayer::JuceMidiFilePlayer(){
     
     
     
-    prophet.midiViewer.setBounds(60, 350, 320, 100);
+    //prophet.midiViewer.setBounds(60, 350, 320, 100);
+    //prophet.viewerValue = &midiViewerValue;
+    
     looper.midiViewer.setBounds(400, 350, 320, 100);
     looper.patternSequencer.stepSequenceViewer.setBounds(400, 470, 320, 100);
     looper.patternSequencer.stepSequenceViewer.noteColor = Colours::dodgerblue;
     
     //to view??
     looper.viewerValue = &midiViewerValue;
-    prophet.viewerValue = &midiViewerValue;
+    
     
     
     
